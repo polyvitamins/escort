@@ -1,0 +1,34 @@
+{
+  "name": "process",
+  "version": "1.0.0",
+  "description": "Performs process() method is a mixture of promises and destructor",
+  "main": "index.js",
+  "scripts": {
+    "test": "tap test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/polyvitamins/process.git"
+  },
+  "keywords": [
+    "promise",
+    "destructor"
+  ],
+  "author": "Vladimir Kalmykov <vladimirmorulus@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/polyvitamins/process/issues"
+  },
+  "homepage": "https://github.com/polyvitamins/process#readme",
+  "devDependencies": {
+    "babel-core": "^6.7.7",
+    "babel-loader": "^6.2.4",
+    "babel-preset-es2015": "^6.6.0",
+    "tab": "^0.1.0",
+    "tap": "^5.7.1",
+    "webpack": "^1.13.0"
+  },
+  "dependencies": {
+    "polypromise": "github:polyvitamins/polypromise"
+  }
+}
