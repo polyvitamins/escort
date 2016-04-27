@@ -22,33 +22,107 @@ exclusive();
 // Complex constructed
 ```
 
+NEED TO PERFORM BITMASK FOR OPTIONS
+Process.create(fn, Process.TRAIT_SINGULAR);
+Process.run(fn, Process.TRAIT_SINGULAR | Process.TRAIT_BREAKABLE | Process.TRAIT_PROMISED);
 
+Vobject.createProcess(fn, Process.TRAIT_PROMISED);
+Vobject.runProcess(fn, Process.TRAIT_BREAKABLE | Process.TRAIT_PROMISED);
 ***/
 
 "use strict";
 
 var Creed = require('polypromise').factory({
-	config: {
-		immediate: true
-	}
+	immediate: true,
+	manual: true
 });
 
-function Processor(handler, context) {
-	this.stamp = handler.toString();
-	this.backups = [];
-	this.context = context||this;
+
+/***
+Progress
+***/
+var $processesKey = Symbol('processes');
+module.exports = class Process {
+	createProcess(executable, bitoptions, parentProcess) {
+		return Process.create(executable, bitoptions, this, parentProcess);
+	}
+
+    runProcess(executable) {
+		return Process.run(executable, bitoptions, this, parentProcess);
+	}
+
+	/**
+	* Create new function assigned to process
+	*
+	* @param {function} executable Any function
+	* @param {number} bitopt Options in bit mask format
+	* @param {object} bindTo Bind process to object (creates special hidden property that contains process keys). Use it only with option PROC_SINGULAR
+	* @param {object} parentProcess Set process as child process of {parentProcess}
+	**/
+	static create(executable, bitopt, bindTo, parentProcess) {
+		
+		if (bitopt & Process.PROC_SINGULAR) {
+			if ("object"===typeof bindTo) {
+				var stamp = executable.toString();
+				if (!bindTo.hasOwnProperty($processesKey)) Object.defineProperty(bindTo, $processesKey, {
+					enumerable: false,
+					value: {}
+				});
+				if ("object"!==typeof Process[$processesKey][stamp])
+	            Process[$processesKey][stamp] = new Processor(executable, bitopt, bindTo, parentProcess);
+	        	return Process[$processesKey][stamp]->progressor;
+	        } else {
+	        	return new Processor(executable, bitopt, Process, parentProcess).progressor;
+	        }
+			
+		} else {
+			return function() {
+				return new Processor(executable, bitopt, "object"===typeof bindTo?bindTo:Process, parentProcess).progressor.apply(Process, Array.prototype.slice.apply(arguments));
+			}
+		}
+	}
+
+	static run(executable, bitopt, bindTo, parentProcess) {
+		return (Process.create(executable, bitopt, bindTo, parentProcess))();
+	}
+}
+
+Process.PROC_SINGULAR = bit.creare(1); // Repeated execution calls rollback of last progress
+Process.PROC_PROMISE = bit.creare(2); // Process become promise
+Process.PROC_WAITTICK = bit.creare(3); // Process waits next tick before execution
+
+
+function Processor(handler, bitoptions, context, parent) {
+	this.destructors = []; // List of functions destructors (see .destructor method)
+	this.closers = []; // List of functions closers (see .closer method)
+	this.context = context||this; // Current context
+	this.bitoptions = bitoptions; // Options in bitmask format
 
 	var processor = this;
 	this.progressor = function process() {
+		if (bitoptions & PROC_PROMISE) this.clearPromise();
 		if (processor.backups.length>0) { // 
 			processor.degrade();
 		}
-		try {
-			var result = handler.apply(processor.context, ([processor]).concat(Array.prototype.slice.call(arguments)));
-            if ("function"===typeof result) processor.destructor(result);
-		} catch(e) {
-			/* Rollback process */
-			processor.abort(e);
+		var result,
+		executor = function() {
+			try {
+				result = handler.apply(processor.context, ([processor]).concat(Array.prototype.slice.call(arguments)));
+	            if ("function"===typeof result) processor.destructor(result);
+			} catch(e) {
+				/* Rollback process */
+				processor.abort(e);
+			}
+		}
+		if (bitoptions & PROC_WAITTICK) {
+			setTimeout(executor);
+		} else {
+			executor();
+		}
+		
+		if (bitoptions & PROC_PROMISE) return processor;
+		else return function() {
+			processor.degrade();
 		}
 	}
     this.progressor.processor = this;
@@ -59,15 +133,42 @@ function Processor(handler, context) {
 
 Processor.prototype = {
 	/**
-	Performs backup function item to rollback queue
+	* Returns destroyer.
+	* 
+	* For example:
+	* var destroyer = this.runProcess(()=>{})
+	* .then(()=>{})
+	* .catch(()=>{})
+	* .destroyer;
+	*
+	**/
+	get destroyer() {
+		return function() {
+			this.degrade();
+		}.bind(this);
+	},
+	/**
+	* Adds reverse function
+	*
+	* @param {function} handler
 	**/
     destructor: function(handler) {
-		this.backups.push(handler);
+		this.destructors.push(handler);
 	},
-    proceed: function(handler) {
+	/**
+	* Adds closer handler (function that will be called at end)
+	**/
+	closer: function(handler) {
+		this.closers.push(handler);
+	},
+	/**
+	* Proceed async. In handler you can use process object as sush as in main process.
+	* 
+	**/
+    async: function(handler) {
 		var processor = this,
 		actual = true;
-		this.distructor(() => actual = false);
+		this.closer(() => actual = false);
 		return function process() {
 			if (!actual) return false; // Ignore function if non actual
             try {
@@ -82,20 +183,42 @@ Processor.prototype = {
 	Rollback all progress changes
 	*/
 	degrade: function(reason) {
-		for (var prop in this.backups) {
-			if (this.backups.hasOwnProperty(prop) && "function"===typeof this.backups[prop]) this.backups[prop]();
+		for (var prop in this.destructors) {
+			if (this.destructors.hasOwnProperty(prop) && "function"===typeof this.des[prop]) this.destructors[prop]();
 		}
-		// Clear backup
-		this.backups = [];
+		this.clear();
 	},
 	/*
 	Calling when process crashed
 	Invokes $reject
 	*/
 	abort: function(reason) {
+		this.stop();
 		this.degrade();
+
+		// Send reject if we are promise
+		if (this.bitoptions & Process.PROC_PROMISE)
 		this.$reject(reason instanceof Error ? reason : new Error(reason));
 	},
+	/*
+	Calling when process successful complete and do not need to do anything in this process (prevent all async functions and subprocesses)
+	*/
+	success: function(data) {
+		this.stop();
+		// Send resolve if we are promise
+		if (this.bitoptions & Process.PROC_PROMISE)
+		this.$resolve(data); 
+	},
+	stop: function() {
+		this.closers.forEach(function(closer) {
+			closer();
+		});
+		this.closers = [];
+	},
+	clear: function() {
+		// Clear backup
+		this.destructors = [];
+	}
     /*
     Executes progressor
     */
@@ -103,45 +226,25 @@ Processor.prototype = {
        this.progressor();
 
         return this;
+    },
+    /*
+	* Sends resolve data (process will not stop)
+    */
+    resolve: function() {
+    	this.$resolve.apply(this, Array.prototype.slice.apply(arguments));
+    },
+    /*
+	* Send reject data (process will not stop)
+    */
+    reject: function() {
+    	this.$reject.apply(this, Array.prototype.slice.apply(arguments));
+    },
+    /**
+	* Clear all Promise queues (resolve, reject, always)
+    **/
+    clearPromise: function() {
+    	this.$clearQueues();
     }
 
 }
-
-/***
-Progress
-***/
-var $processesKey = Symbol('processes');
-module.exports = class Process {
-	createProcess(executable) {
-		return new Processor(executable, this).progressor;
-	}
-
-    runProcess(executable) {
-		var stamp = executable.toString();
-		if (!this.hasOwnProperty($processesKey)) Object.defineProperty(this, $processesKey, {
-			enumerable: false,
-			value: {}
-		});
-        if ("object"!==typeof this[$processesKey][stamp])
-        this[$processesKey][stamp] = ProcessorFactory(handler, Progress);
-        return this[$processesKey][stamp].run();
-	}
-
-	static create(executable) {
-		return new Processor(executable).progressor;
-	}
-
-	static run(executable) {
-		var stamp = executable.toString();
-		if (!Process.hasOwnProperty($processesKey)) Object.defineProperty(Process, $processesKey, {
-			enumerable: false,
-			value: {}
-		});
-		if ("object"!==typeof Process[$processesKey][stamp])
-            Process[$processesKey][stamp] = new Processor(executable, Process);
-        return Process[$processesKey][stamp].run();
-	}
-}
-
-
 

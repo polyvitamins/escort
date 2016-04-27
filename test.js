@@ -100,3 +100,36 @@ tap.test('Test process mixin processing', function(t) {
     });
 
 });
+
+
+tap.test('Promise mode resolve', function(t) {
+	t.plan(1);
+	tester.runProcess(function(process) {
+		setTimeout(process.async(function() {
+			process.resolve('done');
+		}, 100);
+	})
+	.then(function(res) {
+		console.log('Result ', res);
+		t.ok(res=='done', 'Resolve result must be `done`');
+	})
+	.catch(function(e) {
+		throw e;
+	});
+});
+
+tap.test('Promise mode reject', function(t) {
+	t.plan(1);
+	tester.runProcess(function(process) {
+		setTimeout(process.async(function() {
+			process.reject('not done');
+		}, 100);
+	})
+	.then(function(res) {
+		console.log('Result ', res);
+		t.ok(res=='done', 'Resolve result must be `done`');
+	})
+	.catch(function(e) {
+		throw e;
+	});
+});
