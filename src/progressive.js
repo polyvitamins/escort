@@ -6,7 +6,7 @@ Recall the same piece of code will invoke the degrade() method of construct proc
 
 ```
 var deployTarget,
-exclusive = Tracker.equip(function(progress) {
+exclusive = Escort.equip(function(progress) {
 	deployTarget = new Complex();
 	return function() {
 		deployTarget.backtrack();
@@ -23,11 +23,11 @@ exclusive();
 ```
 
 NEED TO PERFORM BITMASK FOR OPTIONS
-Tracker.create(fn, Tracker.TRAIT_SINGULAR);
-Tracker.run(fn, Tracker.TRAIT_SINGULAR | Tracker.TRAIT_BREAKABLE | Tracker.TRAIT_PROMISED);
+Escort.create(fn, Escort.TRAIT_SINGULAR);
+Escort.run(fn, Escort.TRAIT_SINGULAR | Escort.TRAIT_BREAKABLE | Escort.TRAIT_PROMISED);
 
-Vobject.createProcess(fn, Tracker.TRAIT_PROMISED);
-Vobject.runProcess(fn, Tracker.TRAIT_BREAKABLE | Tracker.TRAIT_PROMISED);
+Vobject.createProcess(fn, Escort.TRAIT_PROMISED);
+Vobject.runProcess(fn, Escort.TRAIT_BREAKABLE | Escort.TRAIT_PROMISED);
 ***/
 
 "use strict";
@@ -37,28 +37,28 @@ var Creed = require('polypromise').factory({
 	manual: true
 });
 var inherit = require('inherit');
-var Increment;
+var Suit;
 
 Creed.test = 11;
 /***
-Tracker
+Escort
 ***/
 var $processesKey = Symbol('processes');
-var Tracker = class Tracker {
-	createIncrementation(executable, bitoptions, parentProcess) {
-		return Tracker.create(executable, bitoptions, this, parentProcess);
+var Escort = class Escort {
+	createSuitation(executable, bitoptions, parentProcess) {
+		return Escort.create(executable, bitoptions, this, parentProcess);
 	}
 
-	createSingularIncrementation(executable, bitoptions, parentProcess) {
-		return Tracker.create(executable, (bitoptions || 0) | Tracker.SINGULAR, this, parentProcess);
+	createSingularSuitation(executable, bitoptions, parentProcess) {
+		return Escort.create(executable, (bitoptions || 0) | Escort.SINGULAR, this, parentProcess);
 	}
 
     increment(executable) {
-		return Tracker.run(executable, bitoptions, this, parentProcess);
+		return Escort.run(executable, bitoptions, this, parentProcess);
 	}
 
-	singularIncrement(executable) {
-		return Tracker.run(executable, (bitoptions || 0) | Tracker.SINGULAR, this, parentProcess);
+	singularSuit(executable) {
+		return Escort.run(executable, (bitoptions || 0) | Escort.SINGULAR, this, parentProcess);
 	}
 
 	/**
@@ -71,8 +71,8 @@ var Tracker = class Tracker {
 	**/
 	static factory(executable, bitopt, bindTo, parentProcess) {
 		
-		if (bitopt & Tracker.SINGULAR) {
-            let medium =  "object"===typeof bindTo ? bindTo : Tracker;
+		if (bitopt & Escort.SINGULAR) {
+            let medium =  "object"===typeof bindTo ? bindTo : Escort;
 
 				var stamp = executable.toString();
 				if (!medium.hasOwnProperty($processesKey)) Object.defineProperty(medium, $processesKey, {
@@ -80,28 +80,31 @@ var Tracker = class Tracker {
 					value: {}
 				});
 				if ("object"!==typeof medium[$processesKey][stamp])
-                    medium[$processesKey][stamp] = new Increment(executable, bitopt, medium, parentProcess);
+                    medium[$processesKey][stamp] = new Suit(executable, bitopt, medium, parentProcess);
 	        	return medium[$processesKey][stamp].progressor;
 
 			
 		} else {
 			return function() {
-				return new Increment(executable, bitopt, "object"===typeof bindTo?bindTo:Tracker, parentProcess).progressor.apply(Tracker, Array.prototype.slice.apply(arguments));
+				return new Suit(executable, bitopt, "object"===typeof bindTo?bindTo:Escort, parentProcess).progressor.apply(Escort, Array.prototype.slice.apply(arguments));
 			}
 		}
 	}
 
-	static increment(executable, bitopt, bindTo, parentProcess) {
-		return (Tracker.factory(executable, bitopt, bindTo, parentProcess))();
+	/*
+	Creates new 
+	*/
+	static track(executable, bitopt, bindTo, parentProcess) {
+		return (Escort.factory(executable, bitopt, bindTo, parentProcess))();
 	}
 }
 
-Tracker.SINGULAR = bit.create(1); // Repeated execution calls rollback of last progress
-Tracker.PROMISE = bit.create(2); // Process become promise
-Tracker.WAITTICK = bit.create(3); // Process waits next tick before execution
+Escort.SINGULAR = bit.create(1); // Repeated execution calls rollback of last progress
+Escort.PROMISE = bit.create(2); // Process become promise
+Escort.WAITTICK = bit.create(3); // Process waits next tick before execution
 var $actual = Symbol('actual');
 
-Increment = function(handler, bitoptions, context, parent) {
+Suit = function(handler, bitoptions, context, parent) {
 	this.destructors = []; // List of functions destructors (see .destructor method)
 	this.closers = []; // List of functions closers (see .closer method)
 	this.context = context||this; // Current context
@@ -111,7 +114,7 @@ Increment = function(handler, bitoptions, context, parent) {
 	var processor = this;
 	this.progressor = function process() {
         processor[$actual] = true;
-		if (bitoptions & Tracker.PROMISE) processor.clearPromise();
+		if (bitoptions & Escort.PROMISE) processor.clearPromise();
 		if (processor.destructors.length>0) { // 
 			processor.degrade();
 		}
@@ -125,13 +128,13 @@ Increment = function(handler, bitoptions, context, parent) {
 				processor.abort(e);
 			}
 		}
-		if (bitoptions & Tracker.WAITTICK) {
+		if (bitoptions & Escort.WAITTICK) {
 			setTimeout(executor);
 		} else {
 			executor();
 		}
 		
-		if (bitoptions & Tracker.PROMISE) return processor;
+		if (bitoptions & Escort.PROMISE) return processor;
 		else return function() {
 			processor.degrade();
 		}
@@ -142,7 +145,7 @@ Increment = function(handler, bitoptions, context, parent) {
     };
 }
 
-Increment.prototype = {
+Suit.prototype = {
 	/**
 	* Returns destroyer.
 	* 
@@ -265,7 +268,7 @@ Increment.prototype = {
 		this.degrade();
 
 		// Send reject if we are promise
-		if (this.bitoptions & Tracker.PROMISE)
+		if (this.bitoptions & Escort.PROMISE)
 		this.$reject(reason instanceof Error ? reason : new Error(reason));
 	},
 	/*
@@ -274,7 +277,7 @@ Increment.prototype = {
 	success: function(data) {
 		this.stop();
 		// Send resolve if we are promise
-		if (this.bitoptions & Tracker.PROMISE)
+		if (this.bitoptions & Escort.PROMISE)
 		this.$resolve(data); 
 	},
 	stop: function() {
@@ -317,8 +320,8 @@ Increment.prototype = {
 
 }
 
-Increment = inherit(Increment, Creed);
+Suit = inherit(Suit, Creed);
 
 
-module.exports = Tracker;
+module.exports = Escort;
 

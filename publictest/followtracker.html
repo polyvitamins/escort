@@ -10,13 +10,13 @@
 	<script src="progressive.js"></script>
 	<title>Document</title>
 	<script>
-		Tracker = window.module.exports;
+		Escort = window.module.exports;
 		var outside = {
 	        a: 1,
 	        b: 2,
 	        c: undefined
 	    };
-	    var processor = Tracker.factory(function(increment) {
+	    var processor = Escort.factory(function(increment) {
 	        increment.track(function() {
 	            outside.a = 2;
 	            outside.b = 3;
@@ -26,7 +26,7 @@
 	            }
 	        });
 
-	        increment.follow(Tracker.factory(function(increment) {
+	        increment.follow(Escort.factory(function(increment) {
 	        	increment.track(function() {
 	        		console.log('Sub increment');
 
@@ -36,15 +36,15 @@
 	        	});
 	        	
 	        	increment.abort();
-	        }, Tracker.SINGULAR | Tracker.PROMISE)())
+	        }, Escort.SINGULAR | Escort.PROMISE)())
 	        .catch(function(e) {
 	        	console.warn('Catch inside', e);
 	        });
-	    }, Tracker.SINGULAR | Tracker.PROMISE)
+	    }, Escort.SINGULAR | Escort.PROMISE)
 	    
 
 	    processor().catch(function(e) {
-	    	console.error('Tracker aborted by reason', e);
+	    	console.error('Escort aborted by reason', e);
 	    });
 	</script>
 </head>

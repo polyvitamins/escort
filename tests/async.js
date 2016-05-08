@@ -1,6 +1,6 @@
 "use strict";
 var tap = require('tap');
-var Tracker = require('./../dist/progressive.js');
+var Escort = require('./../dist/progressive.js');
 tap.test('Test degrade at double call',function (t) {
     t.plan(2);
     var outside = {
@@ -8,7 +8,7 @@ tap.test('Test degrade at double call',function (t) {
         b: 2,
         c: undefined
     };
-    var processor = Tracker.factory(function(increment) {
+    var processor = Escort.factory(function(increment) {
         increment.track(function() {
             outside.a = 2;
             outside.b = 3;
@@ -35,7 +35,7 @@ tap.test('Test degrade at double call',function (t) {
 
             increment.degrade();
         }),100);
-    }, Tracker.SINGULAR | Tracker.PROMISE);
+    }, Escort.SINGULAR | Escort.PROMISE);
 
     processor()
     .catch(function(e) {
