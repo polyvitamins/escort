@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<script>
+		window.module = {
+			exports: null
+		}
+	</script>
+	<script src="progressive.js"></script>
+	<title>Document</title>
+	<script>
+		Tracker = window.module.exports;
+		var outside = {
+	        a: 1,
+	        b: 2,
+	        c: undefined
+	    };
+	    var processor = Tracker.factory(function(increment) {
+	        increment.track(function() {
+	            outside.a = 2;
+	            outside.b = 3;
+
+	            return function() {
+	                outside.a = 1;
+	                outside.b = 2;
+	            }
+	        });
+
+	        setTimeout(increment.async(function() {
+
+	            outside.c = 'a';
+	            console.log(outside.a==2&&outside.b==3&&outside.c=='a' ? 'OK' : 'State must be changed by prevoius track');
+
+	            increment.backtrack(function() {
+	                outside.c = undefined;
+	            });
+
+	            setTimeout(function() {
+	                console.log(outside.a==1&&outside.b==2&&outside.c==undefined ? 'OK' : 'State must be changed by prevoius track');
+	                
+	            });
+
+	            throw 'Oups!';
+	        }),100);
+	    }, Tracker.SINGULAR | Tracker.PROMISE);
+
+	    processor()
+	</script>
+</head>
+<body>
+	Hello
+</body>
+</html>

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<script>
+		window.module = {
+			exports: null
+		}
+	</script>
+	<script src="progressive.js"></script>
+	<title>Document</title>
+	<script>
+		Tracker = window.module.exports;
+		var outside = {
+	        a: 1,
+	        b: 2,
+	        c: undefined
+	    };
+	    var processor = Tracker.factory(function(increment) {
+	        increment.track(function() {
+	            outside.a = 2;
+	            outside.b = 3;
+
+	            return function() {
+	                console.debug('Rollback 1');
+	            }
+	        });
+
+	        increment.follow(new Promise(function(resolve, reject) {
+	        	increment.track(function() {
+	        		return function() {
+	        			console.debug('Rollback 2');
+	        		}
+	        	});
+	        	reject('Oups');
+	        }))
+	        .catch(function(e) {
+	        	console.warn('Catch inside', e);
+	        });
+	    }, Tracker.SINGULAR | Tracker.PROMISE)
+	    
+
+	    processor().catch(function(e) {
+	    	console.error('Tracker aborted by reason', e);
+	    });
+	</script>
+</head>
+<body>
+	Hello
+</body>
+</html>
