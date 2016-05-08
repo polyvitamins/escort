@@ -1,14 +1,16 @@
 {
-  "name": "process",
+  "name": "increment-tracker",
   "version": "1.0.0",
-  "description": "Performs process() method is a mixture of promises and destructor",
+  "description": "Allows you to generate a function capable to rollback itself on error or aborting",
   "main": "index.js",
   "scripts": {
-    "test": "tap test.js"
+    "test": "tap test.js",
+    "build": "webpack --config wepback.config.js --progress --colored",
+    "start": "webpack-dev-server --content-base publictest/ --port 6003"
   },
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/polyvitamins/process.git"
+    "url": "git+ssh://git@github.com/polyvitamins/tracker.git"
   },
   "keywords": [
     "promise",
@@ -17,9 +19,9 @@
   "author": "Vladimir Kalmykov <vladimirmorulus@gmail.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/polyvitamins/process/issues"
+    "url": "https://github.com/polyvitamins/tracker/issues"
   },
-  "homepage": "https://github.com/polyvitamins/process#readme",
+  "homepage": "https://github.com/polyvitamins/tracker#readme",
   "devDependencies": {
     "babel-core": "^6.7.7",
     "babel-loader": "^6.2.4",
@@ -29,6 +31,9 @@
     "webpack": "^1.13.0"
   },
   "dependencies": {
-    "polypromise": "github:polyvitamins/polypromise"
+    "bitmask": "github:polyvitamins/bitmask",
+    "inherit": "github:polyvitamins/inherit",
+    "mixin": "github:polyvitamins/mixin",
+    "polypromise": "github:polyvitamins/polypromise#1.2.3"
   }
 }
