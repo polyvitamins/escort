@@ -24,6 +24,7 @@
 	            return function() {
 	                outside.a = 1;
 	                outside.b = 2;
+	                console.debug('Rollback 1');
 	            }
 	        });
 
@@ -34,6 +35,7 @@
 
 	            increment.backtrack(function() {
 	                outside.c = undefined;
+	                console.debug('Rollback 2');
 	            });
 
 	            setTimeout(function() {
@@ -47,7 +49,11 @@
 	    
 
 	    processor().catch(function(e) {
-	    	console.error('Escort aborted by reason', e);
+	    	console.error('FAIL: Escort aborted by reason', e);
+	    });
+
+	    processor().catch(function(e) {
+	    	console.debug('Escort aborted by reason', e);
 	    });
 	</script>
 </head>

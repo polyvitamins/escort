@@ -1,16 +1,16 @@
 {
-  "name": "increment-tracker",
+  "name": "escort",
   "version": "1.0.0",
   "description": "Allows you to generate a function capable to rollback itself on error or aborting",
-  "main": "index.js",
+  "main": "src/escort.js",
   "scripts": {
     "test": "tap test.js",
-    "build": "webpack --config wepback.config.js --progress --colored",
+    "build": "webpack --config webpack.config.js --progress --colored --watch",
     "start": "webpack-dev-server --content-base publictest/ --port 6003"
   },
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/polyvitamins/tracker.git"
+    "url": "git+ssh://git@github.com/polyvitamins/escort.git"
   },
   "keywords": [
     "promise",
@@ -19,9 +19,9 @@
   "author": "Vladimir Kalmykov <vladimirmorulus@gmail.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/polyvitamins/tracker/issues"
+    "url": "https://github.com/polyvitamins/escort/issues"
   },
-  "homepage": "https://github.com/polyvitamins/tracker#readme",
+  "homepage": "https://github.com/polyvitamins/escort#readme",
   "devDependencies": {
     "babel-core": "^6.7.7",
     "babel-loader": "^6.2.4",

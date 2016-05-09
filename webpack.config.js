@@ -3,10 +3,10 @@ var webpack = require('webpack');
 var fs = require('fs');
 module.exports = {
     context: path.join(__dirname, './'), // исходная директория
-	entry: './src/progressive.js', // файл для сборки, если несколько - указываем hash (entry name => filename)
+	entry: './src/escort.js', // файл для сборки, если несколько - указываем hash (entry name => filename)
 	output: {
 		path: path.join(__dirname, 'dist'), // выходная директория
-		filename: 'progressive.js',
+		filename: 'escort.js',
 		libraryTarget: 'commonjs2'
 	},
 	plugins: [

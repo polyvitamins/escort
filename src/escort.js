@@ -70,7 +70,7 @@ var Escort = class Escort {
 	* @param {object} parentProcess Set process as child process of {parentProcess}
 	**/
 	static factory(executable, bitopt, bindTo, parentProcess) {
-		
+		this.$id = Symbol();
 		if (bitopt & Escort.SINGULAR) {
             let medium =  "object"===typeof bindTo ? bindTo : Escort;
 
@@ -81,12 +81,12 @@ var Escort = class Escort {
 				});
 				if ("object"!==typeof medium[$processesKey][stamp])
                     medium[$processesKey][stamp] = new Suit(executable, bitopt, medium, parentProcess);
-	        	return medium[$processesKey][stamp].progressor;
+	        	return medium[$processesKey][stamp].compiledHandler;
 
 			
 		} else {
 			return function() {
-				return new Suit(executable, bitopt, "object"===typeof bindTo?bindTo:Escort, parentProcess).progressor.apply(Escort, Array.prototype.slice.apply(arguments));
+				return new Suit(executable, bitopt, "object"===typeof bindTo?bindTo:Escort, parentProcess).compiledHandler.apply(Escort, Array.prototype.slice.apply(arguments));
 			}
 		}
 	}
@@ -105,47 +105,61 @@ Escort.WAITTICK = bit.create(3); // Process waits next tick before execution
 var $actual = Symbol('actual');
 
 Suit = function(handler, bitoptions, context, parent) {
+	this.bitoptions = bitoptions || 0;
 	this.destructors = []; // List of functions destructors (see .destructor method)
 	this.closers = []; // List of functions closers (see .closer method)
 	this.context = context||this; // Current context
 	this.bitoptions = bitoptions; // Options in bitmask format
     this[$actual] = false;
+	
 
-	var processor = this;
-	this.progressor = function process() {
-        processor[$actual] = true;
-		if (bitoptions & Escort.PROMISE) processor.clearPromise();
-		if (processor.destructors.length>0) { // 
-			processor.degrade();
-		}
-		var result,
-		executor = function() {
-			try {
-				result = handler.apply(processor.context, ([processor]).concat(Array.prototype.slice.call(arguments)));
-	            if ("function"===typeof result) processor.backtrack(result);
-			} catch(e) {
-				/* Rollback process */
-				processor.abort(e);
+	if ("function"===typeof handler) {
+		/* Assumes that the function immediately available */
+		this.compiledHandler = this.compileHandler(handler);
+		this.compiledHandler.suit = this;
+	} else {
+		/* It assumes that the function will be specified later */
+		this.compiledHandler = function slot(handler, args) {
+			this.compileHandler(handler).apply(this, args);
+			if (this.bitoptions & Escort.PROMISE) return this;
+			else return function() {
+				this.degrade();
 			}
-		}
-		if (bitoptions & Escort.WAITTICK) {
-			setTimeout(executor);
-		} else {
-			executor();
-		}
-		
-		if (bitoptions & Escort.PROMISE) return processor;
-		else return function() {
-			processor.degrade();
-		}
+		}.bind(this);
 	}
-    this.progressor.processor = this;
-    this.progressor.run = function() {
-        return this.run();
-    };
 }
 
 Suit.prototype = {
+	compileHandler: function(handler) {
+		var self = this;
+		return function process() {
+			self[$actual] = true;
+			if (self.bitoptions & Escort.PROMISE) self.clearPromise();
+			if (self.destructors.length>0) { // 
+				self.degrade();
+			}
+			var result,
+			executor = function() {
+				try {
+					result = handler.apply(self.context, ([self]).concat(Array.prototype.slice.call(arguments)));
+			        if ("function"===typeof result) self.backtrack(result);
+				} catch(e) {
+					/* Rollback process */
+					self.abort(e);
+				}
+			}
+			if (self.bitoptions & Escort.WAITTICK) {
+				setTimeout(executor);
+			} else {
+				executor();
+			}
+
+			if (self.bitoptions & Escort.PROMISE) return self;
+			else return function() {
+				self.degrade();
+			}
+		}
+	},
 	/**
 	* Returns destroyer.
 	* 
@@ -214,38 +228,48 @@ Suit.prototype = {
 		/* Discard promise if it is not actual */
 		if (!this[$actual]) {
 			if ("function"===typeof promiseLike.abort) promiseLike.abort();
-			return;
+		} else {
+			promiseLike
+			.then((...args) => {
+
+			}).
+			catch((...args) => {
+				this.abort(...args);
+			});
 		}
 
 		/* Listen for reject and make fake promise for output */
-		promiseLike
-		.then((...args) => {
-
-		}).
-		catch((...args) => {
-			this.abort(...args);
-		});
+		
 		return {
 			then: (handler) => {
+				if (this[$actual]) 
 				promiseLike.then(this.async(handler));
+				return promiseLike;
 			},
 			catch: (handler) => {
+				if (this[$actual]) 
 				promiseLike.catch(this.async(handler));
+				return promiseLike;
 			},
 			complete: (handler) => {
-				if ("function"===typeof promiseLike.complete) {
-					promiseLike.complete(this.async(handler));
-				} else {
-					var awaits = true;
-					promiseLike.then((...args) => {
-						if (awaits) this.async(handler)(...args);
-						awaits = false;
-					});
-					promiseLike.catch((...args) => {
-						if (awaits) this.async(handler)(...args);
-						awaits = false;
-					});
+				if (this[$actual]) {
+					if ("function"===typeof promiseLike.complete) {
+						promiseLike.complete(this.async(handler));
+					} else if ("function"===typeof promiseLike.always) {
+						promiseLike.always(this.async(handler));
+					} else {
+						var awaits = true;
+						promiseLike.then((...args) => {
+							if (awaits) this.async(handler)(...args);
+							awaits = false;
+						});
+						promiseLike.catch((...args) => {
+							if (awaits) this.async(handler)(...args);
+							awaits = false;
+						});
+					}
 				}
+				return promiseLike;
 			}
 		}
 	},
@@ -292,10 +316,10 @@ Suit.prototype = {
 		this.destructors = [];
 	},
     /*
-    Executes progressor
+    Executes compiled handler
     */
     run: function() {
-       this.progressor();
+       this.compiledHandler();
 
         return this;
     },
