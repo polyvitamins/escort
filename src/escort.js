@@ -243,28 +243,28 @@ Suit.prototype = {
 		return {
 			then: (handler) => {
 				if (this[$actual]) 
-				promiseLike.then(this.async(handler));
+				promiseLike.then(handler);
 				return promiseLike;
 			},
 			catch: (handler) => {
 				if (this[$actual]) 
-				promiseLike.catch(this.async(handler));
+				promiseLike.catch(handler);
 				return promiseLike;
 			},
 			complete: (handler) => {
 				if (this[$actual]) {
 					if ("function"===typeof promiseLike.complete) {
-						promiseLike.complete(this.async(handler));
+						promiseLike.complete(handler);
 					} else if ("function"===typeof promiseLike.always) {
 						promiseLike.always(this.async(handler));
 					} else {
 						var awaits = true;
 						promiseLike.then((...args) => {
-							if (awaits) this.async(handler)(...args);
+							if (awaits) handler(...args);
 							awaits = false;
 						});
 						promiseLike.catch((...args) => {
-							if (awaits) this.async(handler)(...args);
+							if (awaits) handler(...args);
 							awaits = false;
 						});
 					}
@@ -288,6 +288,7 @@ Suit.prototype = {
 	Invokes $reject
 	*/
 	abort: function(reason) {
+		console.warn('Escort aborted: ', reason);
 		this.stop();
 		this.degrade();
 

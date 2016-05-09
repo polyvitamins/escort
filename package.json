@@ -1,6 +1,6 @@
 {
   "name": "escort",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Allows you to generate a function capable to rollback itself on error or aborting",
   "main": "src/escort.js",
   "scripts": {
@@ -34,6 +34,6 @@
     "bitmask": "github:polyvitamins/bitmask",
     "inherit": "github:polyvitamins/inherit#1.0.0",
     "mixin": "github:polyvitamins/mixin",
-    "polypromise": "github:polyvitamins/polypromise#1.2.4"
+    "polypromise": "github:polyvitamins/polypromise#1.2.5"
   }
 }
