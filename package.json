@@ -32,8 +32,8 @@
   },
   "dependencies": {
     "bitmask": "github:polyvitamins/bitmask",
-    "inherit": "github:polyvitamins/inherit",
+    "inherit": "github:polyvitamins/inherit#1.0.0",
     "mixin": "github:polyvitamins/mixin",
-    "polypromise": "github:polyvitamins/polypromise#1.2.3"
+    "polypromise": "github:polyvitamins/polypromise#1.2.4"
   }
 }
