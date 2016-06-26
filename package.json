@@ -1,6 +1,6 @@
 {
   "name": "escort",
-  "version": "1.2.4",
+  "version": "1.2.5",
   "description": "Allows you to generate a function capable to rollback itself on error or aborting",
   "main": "src/escort.js",
   "scripts": {
