@@ -74,15 +74,9 @@ var Escort = class Escort {
 		this.$id = Symbol();
 		if (bitopt & Escort.SINGULAR) {
             let medium =  "object"===typeof bindTo ? bindTo : Escort;
-
-				var stamp = executable.toString();
-				if (!medium.hasOwnProperty($processesKey)) Object.defineProperty(medium, $processesKey, {
-					enumerable: false,
-					value: {}
-				});
-				if ("object"!==typeof medium[$processesKey][stamp])
-                    medium[$processesKey][stamp] = new Suit(executable, bitopt, medium, parentProcess);
-	        	return medium[$processesKey][stamp].compiledHandler;
+				
+				var suit = new Suit(executable, bitopt, medium, parentProcess);
+	        	return suit.compiledHandler;
 
 			
 		} else {
@@ -354,6 +348,12 @@ Suit.prototype = {
 
 Suit = inherit(Suit, Creed);
 
+function bindMethodDestroyer (anmethod) {
+	return () => {
+		anmethod.destroy();
+	}
+}
+
 function createSingularMethods() {
 	let Component, methods;
 	if ("function"===typeof arguments[0]) {
@@ -388,11 +388,8 @@ function createSingularMethods() {
 
 			for (let methodName in methods) {
 				if (methods.hasOwnProperty(methodName)) {
-
 					this[methodName] = Escort.factory(methods[methodName].bind(this), Escort.SINGULAR, HighOrderSingulars);
-					this[$objectSingularDestructors].push(() => {
-						this[methodName].destroy();
-					});
+					this[$objectSingularDestructors].push(bindMethodDestroyer.call(this, this[methodName]));
 				}
 			}
 		}

@@ -22,6 +22,11 @@
 			this.hello('World');
 		}
 
+		Parent.prototype.goTest2 = function() {
+			this.world('World');
+		}
+
+		
 		class Tester extends Escort.createSingularMethods(Parent, {
 			hello(singular, who) {
 				console.log('Hello', who);
@@ -29,6 +34,15 @@
 					console.log('Create');
 					return function() {
 						console.log('Destroy');
+					}
+				});
+			},
+			world(singular) {
+				console.log('World');
+				singular.track(() => {
+					console.log('World Create');
+					return function() {
+						console.log('World Destroy');
 					}
 				});
 			}
@@ -39,9 +53,9 @@
 		}
 
 		var A = new Tester();
-		debugger;
+		
 		A.goTest();
-		A.goTest();
+		A.goTest2();
 
 		A.destroy();
 

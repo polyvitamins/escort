@@ -167,13 +167,8 @@ return /******/ (function(modules) { // webpackBootstrap
 				if (bitopt & Escort.SINGULAR) {
 					var medium = "object" === (typeof bindTo === 'undefined' ? 'undefined' : _typeof(bindTo)) ? bindTo : Escort;
 
-					var stamp = executable.toString();
-					if (!medium.hasOwnProperty($processesKey)) Object.defineProperty(medium, $processesKey, {
-						enumerable: false,
-						value: {}
-					});
-					if ("object" !== _typeof(medium[$processesKey][stamp])) medium[$processesKey][stamp] = new Suit(executable, bitopt, medium, parentProcess);
-					return medium[$processesKey][stamp].compiledHandler;
+					var suit = new Suit(executable, bitopt, medium, parentProcess);
+					return suit.compiledHandler;
 				} else {
 					return function () {
 						return new Suit(executable, bitopt, "object" === (typeof bindTo === 'undefined' ? 'undefined' : _typeof(bindTo)) ? bindTo : Escort, parentProcess).compiledHandler.apply(Escort, Array.prototype.slice.apply(arguments));
@@ -442,6 +437,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	Suit = inherit(Suit, Creed);
 
+	function bindMethodDestroyer(anmethod) {
+		return function () {
+			anmethod.destroy();
+		};
+	}
+
 	function createSingularMethods() {
 		var Component = void 0,
 		    methods = void 0;
@@ -504,18 +505,11 @@ return /******/ (function(modules) { // webpackBootstrap
 					}
 				});
 
-				var _loop = function _loop(methodName) {
-					if (methods.hasOwnProperty(methodName)) {
-
-						_this3[methodName] = Escort.factory(methods[methodName].bind(_this3), Escort.SINGULAR, HighOrderSingulars);
-						_this3[$objectSingularDestructors].push(function () {
-							_this3[methodName].destroy();
-						});
-					}
-				};
-
 				for (var methodName in methods) {
-					_loop(methodName);
+					if (methods.hasOwnProperty(methodName)) {
+						_this3[methodName] = Escort.factory(methods[methodName].bind(_this3), Escort.SINGULAR, HighOrderSingulars);
+						_this3[$objectSingularDestructors].push(bindMethodDestroyer.call(_this3, _this3[methodName]));
+					}
 				}
 				return _this3;
 			}
