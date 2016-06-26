@@ -43,7 +43,8 @@ Creed.test = 11;
 /***
 Escort
 ***/
-var $processesKey = Symbol('processes');
+var $processesKey = Symbol('processes'),
+$objectSingularDestructors = Symbol();
 var Escort = class Escort {
 	createSuitation(executable, bitoptions, parentProcess) {
 		return Escort.create(executable, bitoptions, this, parentProcess);
@@ -102,6 +103,7 @@ var Escort = class Escort {
 Escort.SINGULAR = bit.create(1); // Repeated execution calls rollback of last progress
 Escort.PROMISE = bit.create(2); // Process become promise
 Escort.WAITTICK = bit.create(3); // Process waits next tick before execution
+Escort.DESCTRUCTOR = Symbol('DESCTRUCTOR');
 var $actual = Symbol('actual');
 
 Suit = function(handler, bitoptions, context, parent) {
@@ -116,6 +118,10 @@ Suit = function(handler, bitoptions, context, parent) {
 	if ("function"===typeof handler) {
 		/* Assumes that the function immediately available */
 		this.compiledHandler = this.compileHandler(handler);
+		this.compiledHandler.destroy = function() {
+			this.stop();
+			this.degrade();
+		}.bind(this);
 		this.compiledHandler.suit = this;
 	} else {
 		/* It assumes that the function will be specified later */
@@ -347,6 +353,53 @@ Suit.prototype = {
 
 Suit = inherit(Suit, Creed);
 
+function createSingularMethods() {
+	let Component, methods;
+	if ("function"===typeof arguments[0]) {
+		Component = arguments[0];
+		methods = "object"===typeof arguments[1] ? arguments[1] : {};
+	} else {
+		Component = class {};
+		methods = "object"===typeof arguments[0] ? arguments[0] : {};
+	}
+	
+	return class HighOrderSingulars extends Component {
+		constructor() {
+			super();
+			// List of destructors
+			Object.defineProperty(this, $objectSingularDestructors, {
+				writable: false,
+				editable: false,
+				enumerable: false,
+				value: []
+			});
 
-module.exports = Escort;
+			Object.defineProperty(this, Escort.DESCTRUCTOR, {
+				writable: false,
+				editable: false,
+				enumerable: false,
+				value: () => {
+					for (let destroyer of this[$objectSingularDestructors]) {
+						destroyer();
+					}
+				}
+			});
+
+			for (let methodName in methods) {
+				if (methods.hasOwnProperty(methodName)) {
+
+					this[methodName] = Escort.factory(methods[methodName], Escort.SINGULAR, HighOrderSingulars);
+					this[$objectSingularDestructors].push(() => {
+						this[methodName].destroy();
+					});
+				}
+			}
+		}
+	}
+	
+}
+
+Escort.createSingularMethods = createSingularMethods;
+
+export default Escort;
 

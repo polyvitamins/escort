@@ -1,6 +1,6 @@
 "use strict";
 var tap = require('tap');
-var Escort = require('./../dist/progressive.js');
+var Escort = require('./../dist/escort-es5.js');
 tap.test('Test degrade at double call',function (t) {
 	t.plan(2);
 	var outside = {

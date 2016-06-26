@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<script>
+		window.exports = {};
+		window.module = {
+			exports: window.exports
+		}
+	</script>
+	<script src="escort.js"></script>
+	<title>Document</title>
+	<script>
+
+		Escort = window.module.exports;
+
+		function Parent () {
+			
+		}
+
+		Parent.prototype.goTest = function() {
+			this.hello();
+		}
+
+		class Tester extends Escort.createSingularMethods(Parent, {
+			hello(progress) {
+				console.log('Hello');
+				progress.track(() => {
+					console.log('Create');
+					return function() {
+						console.log('Destroy');
+					}
+				});
+			}
+		}) {
+			destroy() {
+				this[Escort.DESCTRUCTOR]();
+			}
+		}
+
+		var A = new Tester();
+		debugger;
+		A.goTest();
+		A.goTest();
+
+		A.destroy();
+
+
+	</script>
+</head>
+<body>
+	Hello
+</body>
+</html>

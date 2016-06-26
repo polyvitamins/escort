@@ -7,8 +7,17 @@
  * 
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-module.exports =
-/******/ (function(modules) { // webpackBootstrap
+(function webpackUniversalModuleDefinition(root, factory) {
+	if(typeof exports === 'object' && typeof module === 'object')
+		module.exports = factory();
+	else if(typeof define === 'function' && define.amd)
+		define([], factory);
+	else {
+		var a = factory();
+		for(var i in a) (typeof exports === 'object' ? exports : root)[i] = a[i];
+	}
+})(this, function() {
+return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
 
@@ -87,6 +96,10 @@ module.exports =
 	***/
 
 	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
 
 	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
 
@@ -315,27 +328,27 @@ module.exports =
 
 			return {
 				then: function then(handler) {
-					if (_this[$actual]) promiseLike.then(_this.async(handler));
+					if (_this[$actual]) promiseLike.then(handler);
 					return promiseLike;
 				},
 				catch: function _catch(handler) {
-					if (_this[$actual]) promiseLike.catch(_this.async(handler));
+					if (_this[$actual]) promiseLike.catch(handler);
 					return promiseLike;
 				},
 				complete: function complete(handler) {
 					if (_this[$actual]) {
 						if ("function" === typeof promiseLike.complete) {
-							promiseLike.complete(_this.async(handler));
+							promiseLike.complete(handler);
 						} else if ("function" === typeof promiseLike.always) {
 							promiseLike.always(_this.async(handler));
 						} else {
 							var awaits = true;
 							promiseLike.then(function () {
-								if (awaits) _this.async(handler).apply(undefined, arguments);
+								if (awaits) handler.apply(undefined, arguments);
 								awaits = false;
 							});
 							promiseLike.catch(function () {
-								if (awaits) _this.async(handler).apply(undefined, arguments);
+								if (awaits) handler.apply(undefined, arguments);
 								awaits = false;
 							});
 						}
@@ -359,6 +372,7 @@ module.exports =
 	 Invokes $reject
 	 */
 		abort: function abort(reason) {
+			console.warn('Escort aborted: ', reason);
 			this.stop();
 			this.degrade();
 
@@ -415,7 +429,21 @@ module.exports =
 
 	Suit = inherit(Suit, Creed);
 
-	module.exports = Escort;
+	function createSingularContainer(Component, methods) {
+		return function HighOrderSingular() {
+			_classCallCheck(this, HighOrderSingular);
+		};
+		for (var methodName in methods) {
+			if (methods.hasOwnProperty(methodName)) {
+				HighOrderSingular.prototype[methodName] = Escort.factory(methods[methodName], SINGULAR, HighOrderSingular);
+			}
+		}
+	}
+
+	Escort.createSingularContainer = createSingularContainer;
+
+	exports.default = Escort;
+	module.exports = exports['default'];
 
 /***/ },
 /* 1 */
@@ -2182,4 +2210,6 @@ module.exports =
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ }
-/******/ ]);
+/******/ ])
+});
+;

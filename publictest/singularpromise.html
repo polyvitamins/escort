@@ -3,20 +3,21 @@
 <head>
 	<meta charset="UTF-8">
 	<script>
+		window.exports = {};
 		window.module = {
-			exports: null
+			exports: window.exports
 		}
 	</script>
-	<script src="progressive.js"></script>
+	<script src="escort.js"></script>
 	<title>Document</title>
 	<script>
-		Dummy = window.module.exports;
+		Escort = window.module.exports;
 		var outside = {
 	        a: 1,
 	        b: 2,
 	        c: undefined
 	    };
-	    var processor = Dummy.factory(function(increment) {
+	    var processor = Escort.factory(function(increment) {
 	        increment.track(function() {
 	        	console.log('Init 1');
 	            outside.a = 2;
@@ -39,7 +40,7 @@
 	        .catch(function(e) {
 	        	console.warn('Catch inside', e);
 	        });
-	    }, Dummy.SINGULAR | Dummy.PROMISE)
+	    }, Escort.SINGULAR | Escort.PROMISE)
 	    
 	    processor();
 	    processor().catch(function(e) {

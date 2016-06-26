@@ -7,7 +7,8 @@ module.exports = {
 	output: {
 		path: path.join(__dirname, 'dist'), // выходная директория
 		filename: 'escort.js',
-		libraryTarget: 'commonjs2'
+
+		libraryTarget: 'umd'
 	},
 	plugins: [
 		//new webpack.optimize.UglifyJsPlugin()

@@ -3,20 +3,21 @@
 <head>
 	<meta charset="UTF-8">
 	<script>
+		window.exports = {};
 		window.module = {
-			exports: null
+			exports: window.exports
 		}
 	</script>
-	<script src="progressive.js"></script>
+	<script src="escort.js"></script>
 	<title>Document</title>
 	<script>
-		Dummy = window.module.exports;
+		Escort = window.module.exports;
 		var outside = {
 	        a: 1,
 	        b: 2,
 	        c: undefined
 	    };
-	    var processor = Dummy.factory(false, Dummy.SINGULAR | Dummy.PROMISE)
+	    var processor = Escort.factory(false, Escort.SINGULAR | Escort.PROMISE)
 	    
 	    processor(function(increment) {
 	        increment.track(function() {
