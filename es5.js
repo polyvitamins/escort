@@ -507,7 +507,7 @@ return /******/ (function(modules) { // webpackBootstrap
 				var _loop = function _loop(methodName) {
 					if (methods.hasOwnProperty(methodName)) {
 
-						_this3[methodName] = Escort.factory(methods[methodName], Escort.SINGULAR, HighOrderSingulars);
+						_this3[methodName] = Escort.factory(methods[methodName].bind(_this3), Escort.SINGULAR, HighOrderSingulars);
 						_this3[$objectSingularDestructors].push(function () {
 							_this3[methodName].destroy();
 						});
