@@ -389,7 +389,7 @@ function createSingularMethods() {
 			for (let methodName in methods) {
 				if (methods.hasOwnProperty(methodName)) {
 
-					this[methodName] = Escort.factory(methods[methodName], Escort.SINGULAR, HighOrderSingulars);
+					this[methodName] = Escort.factory(methods[methodName].bind(this), Escort.SINGULAR, HighOrderSingulars);
 					this[$objectSingularDestructors].push(() => {
 						this[methodName].destroy();
 					});
