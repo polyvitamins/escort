@@ -5,8 +5,8 @@ module.exports = {
     context: path.join(__dirname, './'), // исходная директория
 	entry: './src/escort.js', // файл для сборки, если несколько - указываем hash (entry name => filename)
 	output: {
-		path: path.join(__dirname, 'dist'), // выходная директория
-		filename: 'escort.js',
+		path: path.join(__dirname, ''), // выходная директория
+		filename: 'es5.js',
 
 		libraryTarget: 'umd'
 	},

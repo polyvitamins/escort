@@ -139,6 +139,7 @@ Suit.prototype = {
 	compileHandler: function(handler) {
 		var self = this;
 		return function process() {
+			var args = Array.prototype.slice.call(arguments);
 			self[$actual] = true;
 			if (self.bitoptions & Escort.PROMISE) self.clearPromise();
 			if (self.destructors.length>0) { // 
@@ -147,7 +148,7 @@ Suit.prototype = {
 			var result,
 			executor = function() {
 				try {
-					result = handler.apply(self.context, ([self]).concat(Array.prototype.slice.call(arguments)));
+					result = handler.apply(self.context, ([self]).concat(args));
 			        if ("function"===typeof result) self.backtrack(result);
 				} catch(e) {
 					/* Rollback process */

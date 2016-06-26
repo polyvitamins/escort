@@ -8,7 +8,7 @@
 			exports: window.exports
 		}
 	</script>
-	<script src="escort.js"></script>
+	<script src="es5.js"></script>
 	<title>Document</title>
 	<script>
 
@@ -19,13 +19,13 @@
 		}
 
 		Parent.prototype.goTest = function() {
-			this.hello();
+			this.hello('World');
 		}
 
 		class Tester extends Escort.createSingularMethods(Parent, {
-			hello(progress) {
-				console.log('Hello');
-				progress.track(() => {
+			hello(singular, who) {
+				console.log('Hello', who);
+				singular.track(() => {
 					console.log('Create');
 					return function() {
 						console.log('Destroy');
