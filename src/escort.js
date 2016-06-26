@@ -146,9 +146,9 @@ Suit.prototype = {
 				self.degrade();
 			}
 			var result,
-			executor = function() {
+			executor = () => {
 				try {
-					result = handler.apply(self.context, ([self]).concat(args));
+					result = handler.apply(this, ([self]).concat(args));
 			        if ("function"===typeof result) self.backtrack(result);
 				} catch(e) {
 					/* Rollback process */

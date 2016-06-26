@@ -232,6 +232,8 @@ return /******/ (function(modules) { // webpackBootstrap
 		compileHandler: function compileHandler(handler) {
 			var self = this;
 			return function process() {
+				var _this = this;
+
 				var args = Array.prototype.slice.call(arguments);
 				self[$actual] = true;
 				if (self.bitoptions & Escort.PROMISE) self.clearPromise();
@@ -242,7 +244,7 @@ return /******/ (function(modules) { // webpackBootstrap
 				var result,
 				    executor = function executor() {
 					try {
-						result = handler.apply(self.context, [self].concat(args));
+						result = handler.apply(_this, [self].concat(args));
 						if ("function" === typeof result) self.backtrack(result);
 					} catch (e) {
 						/* Rollback process */
@@ -324,14 +326,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	 .then(() => {})
 	 */
 		follow: function follow(promiseLike) {
-			var _this = this;
+			var _this2 = this;
 
 			/* Discard promise if it is not actual */
 			if (!this[$actual]) {
 				if ("function" === typeof promiseLike.abort) promiseLike.abort();
 			} else {
 				promiseLike.then(function () {}).catch(function () {
-					_this.abort.apply(_this, arguments);
+					_this2.abort.apply(_this2, arguments);
 				});
 			}
 
@@ -339,19 +341,19 @@ return /******/ (function(modules) { // webpackBootstrap
 
 			return {
 				then: function then(handler) {
-					if (_this[$actual]) promiseLike.then(handler);
+					if (_this2[$actual]) promiseLike.then(handler);
 					return promiseLike;
 				},
 				catch: function _catch(handler) {
-					if (_this[$actual]) promiseLike.catch(handler);
+					if (_this2[$actual]) promiseLike.catch(handler);
 					return promiseLike;
 				},
 				complete: function complete(handler) {
-					if (_this[$actual]) {
+					if (_this2[$actual]) {
 						if ("function" === typeof promiseLike.complete) {
 							promiseLike.complete(handler);
 						} else if ("function" === typeof promiseLike.always) {
-							promiseLike.always(_this.async(handler));
+							promiseLike.always(_this2.async(handler));
 						} else {
 							var awaits = true;
 							promiseLike.then(function () {
@@ -461,16 +463,16 @@ return /******/ (function(modules) { // webpackBootstrap
 
 				// List of destructors
 
-				var _this2 = _possibleConstructorReturn(this, Object.getPrototypeOf(HighOrderSingulars).call(this));
+				var _this3 = _possibleConstructorReturn(this, Object.getPrototypeOf(HighOrderSingulars).call(this));
 
-				Object.defineProperty(_this2, $objectSingularDestructors, {
+				Object.defineProperty(_this3, $objectSingularDestructors, {
 					writable: false,
 					editable: false,
 					enumerable: false,
 					value: []
 				});
 
-				Object.defineProperty(_this2, Escort.DESCTRUCTOR, {
+				Object.defineProperty(_this3, Escort.DESCTRUCTOR, {
 					writable: false,
 					editable: false,
 					enumerable: false,
@@ -480,7 +482,7 @@ return /******/ (function(modules) { // webpackBootstrap
 						var _iteratorError = undefined;
 
 						try {
-							for (var _iterator = _this2[$objectSingularDestructors][Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+							for (var _iterator = _this3[$objectSingularDestructors][Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
 								var destroyer = _step.value;
 
 								destroyer();
@@ -505,9 +507,9 @@ return /******/ (function(modules) { // webpackBootstrap
 				var _loop = function _loop(methodName) {
 					if (methods.hasOwnProperty(methodName)) {
 
-						_this2[methodName] = Escort.factory(methods[methodName], Escort.SINGULAR, HighOrderSingulars);
-						_this2[$objectSingularDestructors].push(function () {
-							_this2[methodName].destroy();
+						_this3[methodName] = Escort.factory(methods[methodName], Escort.SINGULAR, HighOrderSingulars);
+						_this3[$objectSingularDestructors].push(function () {
+							_this3[methodName].destroy();
 						});
 					}
 				};
@@ -515,7 +517,7 @@ return /******/ (function(modules) { // webpackBootstrap
 				for (var methodName in methods) {
 					_loop(methodName);
 				}
-				return _this2;
+				return _this3;
 			}
 
 			return HighOrderSingulars;
