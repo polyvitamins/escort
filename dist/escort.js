@@ -105,6 +105,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 	var bit = __webpack_require__(1);
@@ -119,7 +123,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	/***
 	Escort
 	***/
-	var $processesKey = Symbol('processes');
+	var $processesKey = Symbol('processes'),
+	    $objectSingularDestructors = Symbol();
 	var Escort = function () {
 		function Escort() {
 			_classCallCheck(this, Escort);
@@ -193,6 +198,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	Escort.SINGULAR = bit.create(1); // Repeated execution calls rollback of last progress
 	Escort.PROMISE = bit.create(2); // Process become promise
 	Escort.WAITTICK = bit.create(3); // Process waits next tick before execution
+	Escort.DESCTRUCTOR = Symbol('DESCTRUCTOR');
 	var $actual = Symbol('actual');
 
 	Suit = function Suit(handler, bitoptions, context, parent) {
@@ -206,6 +212,10 @@ return /******/ (function(modules) { // webpackBootstrap
 		if ("function" === typeof handler) {
 			/* Assumes that the function immediately available */
 			this.compiledHandler = this.compileHandler(handler);
+			this.compiledHandler.destroy = function () {
+				this.stop();
+				this.degrade();
+			}.bind(this);
 			this.compiledHandler.suit = this;
 		} else {
 			/* It assumes that the function will be specified later */
@@ -429,18 +439,89 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	Suit = inherit(Suit, Creed);
 
-	function createSingularContainer(Component, methods) {
-		return function HighOrderSingular() {
-			_classCallCheck(this, HighOrderSingular);
-		};
-		for (var methodName in methods) {
-			if (methods.hasOwnProperty(methodName)) {
-				HighOrderSingular.prototype[methodName] = Escort.factory(methods[methodName], SINGULAR, HighOrderSingular);
-			}
+	function createSingularMethods() {
+		var Component = void 0,
+		    methods = void 0;
+		if ("function" === typeof arguments[0]) {
+			Component = arguments[0];
+			methods = "object" === _typeof(arguments[1]) ? arguments[1] : {};
+		} else {
+			Component = function Component() {
+				_classCallCheck(this, Component);
+			};
+			methods = "object" === _typeof(arguments[0]) ? arguments[0] : {};
 		}
+
+		return function (_Component) {
+			_inherits(HighOrderSingulars, _Component);
+
+			function HighOrderSingulars() {
+				_classCallCheck(this, HighOrderSingulars);
+
+				// List of destructors
+
+				var _this2 = _possibleConstructorReturn(this, Object.getPrototypeOf(HighOrderSingulars).call(this));
+
+				Object.defineProperty(_this2, $objectSingularDestructors, {
+					writable: false,
+					editable: false,
+					enumerable: false,
+					value: []
+				});
+
+				Object.defineProperty(_this2, Escort.DESCTRUCTOR, {
+					writable: false,
+					editable: false,
+					enumerable: false,
+					value: function value() {
+						var _iteratorNormalCompletion = true;
+						var _didIteratorError = false;
+						var _iteratorError = undefined;
+
+						try {
+							for (var _iterator = _this2[$objectSingularDestructors][Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+								var destroyer = _step.value;
+
+								destroyer();
+							}
+						} catch (err) {
+							_didIteratorError = true;
+							_iteratorError = err;
+						} finally {
+							try {
+								if (!_iteratorNormalCompletion && _iterator.return) {
+									_iterator.return();
+								}
+							} finally {
+								if (_didIteratorError) {
+									throw _iteratorError;
+								}
+							}
+						}
+					}
+				});
+
+				var _loop = function _loop(methodName) {
+					if (methods.hasOwnProperty(methodName)) {
+
+						_this2[methodName] = Escort.factory(methods[methodName], Escort.SINGULAR, HighOrderSingulars);
+						_this2[$objectSingularDestructors].push(function () {
+							_this2[methodName].destroy();
+						});
+					}
+				};
+
+				for (var methodName in methods) {
+					_loop(methodName);
+				}
+				return _this2;
+			}
+
+			return HighOrderSingulars;
+		}(Component);
 	}
 
-	Escort.createSingularContainer = createSingularContainer;
+	Escort.createSingularMethods = createSingularMethods;
 
 	exports.default = Escort;
 	module.exports = exports['default'];
