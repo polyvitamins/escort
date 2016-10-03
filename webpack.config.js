@@ -7,8 +7,7 @@ module.exports = {
 	output: {
 		path: path.join(__dirname, ''), // выходная директория
 		filename: 'es5.js',
-
-		libraryTarget: 'umd'
+		libraryTarget: 'commonjs2'
 	},
 	plugins: [
 		//new webpack.optimize.UglifyJsPlugin()

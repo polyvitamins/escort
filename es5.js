@@ -7,17 +7,8 @@
  * 
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-(function webpackUniversalModuleDefinition(root, factory) {
-	if(typeof exports === 'object' && typeof module === 'object')
-		module.exports = factory();
-	else if(typeof define === 'function' && define.amd)
-		define([], factory);
-	else {
-		var a = factory();
-		for(var i in a) (typeof exports === 'object' ? exports : root)[i] = a[i];
-	}
-})(this, function() {
-return /******/ (function(modules) { // webpackBootstrap
+module.exports =
+/******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
 
@@ -96,10 +87,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	***/
 
 	"use strict";
-
-	Object.defineProperty(exports, "__esModule", {
-		value: true
-	});
 
 	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
 
@@ -190,11 +177,10 @@ return /******/ (function(modules) { // webpackBootstrap
 		return Escort;
 	}();
 
-	Escort.SINGULAR = bit.create(1); // Repeated execution calls rollback of last progress
-	Escort.PROMISE = bit.create(2); // Process become promise
-	Escort.WAITTICK = bit.create(3); // Process waits next tick before execution
-	Escort.DESCTRUCTOR = Symbol('DESCTRUCTOR');
-	var $actual = Symbol('actual');
+	var $$SINGULAR = bit.create(1); // Repeated execution calls rollback of last progress
+	var $$PROMISE = bit.create(2); // Process become promise
+	var $$WAITTICK = bit.create(3); // Process waits next tick before execution
+	var $$DESTRUCTOR = Symbol('DESTRUCTOR');
 
 	Suit = function Suit(handler, bitoptions, context, parent) {
 		this.bitoptions = bitoptions || 0;
@@ -216,7 +202,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			/* It assumes that the function will be specified later */
 			this.compiledHandler = function slot(handler, args) {
 				this.compileHandler(handler).apply(this, args);
-				if (this.bitoptions & Escort.PROMISE) return this;else return function () {
+				if (this.bitoptions & $$PROMISE) return this;else return function () {
 					this.degrade();
 				};
 			}.bind(this);
@@ -231,7 +217,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 				var args = Array.prototype.slice.call(arguments);
 				self[$actual] = true;
-				if (self.bitoptions & Escort.PROMISE) self.clearPromise();
+				if (self.bitoptions & $$PROMISE) self.clearPromise();
 				if (self.destructors.length > 0) {
 					//
 					self.degrade();
@@ -246,13 +232,13 @@ return /******/ (function(modules) { // webpackBootstrap
 						self.abort(e);
 					}
 				};
-				if (self.bitoptions & Escort.WAITTICK) {
+				if (self.bitoptions & $$WAITTICK) {
 					setTimeout(executor);
 				} else {
 					executor();
 				}
 
-				if (self.bitoptions & Escort.PROMISE) return self;else return function () {
+				if (self.bitoptions & $$PROMISE) return self;else return function () {
 					self.degrade();
 				};
 			};
@@ -385,7 +371,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			this.degrade();
 
 			// Send reject if we are promise
-			if (this.bitoptions & Escort.PROMISE) this.$reject(reason instanceof Error ? reason : new Error(reason));
+			if (this.bitoptions & $$PROMISE) this.$reject(reason instanceof Error ? reason : new Error(reason));
 		},
 		/*
 	 Calling when process successful complete and do not need to do anything in this process (prevent all async functions and subprocesses)
@@ -393,7 +379,7 @@ return /******/ (function(modules) { // webpackBootstrap
 		success: function success(data) {
 			this.stop();
 			// Send resolve if we are promise
-			if (this.bitoptions & Escort.PROMISE) this.$resolve(data);
+			if (this.bitoptions & $$PROMISE) this.$resolve(data);
 		},
 		stop: function stop() {
 			this[$actual] = false;
@@ -473,7 +459,7 @@ return /******/ (function(modules) { // webpackBootstrap
 					value: []
 				});
 
-				Object.defineProperty(_this3, Escort.DESCTRUCTOR, {
+				Object.defineProperty(_this3, $$DESTRUCTOR, {
 					writable: false,
 					editable: false,
 					enumerable: false,
@@ -507,7 +493,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 				for (var methodName in methods) {
 					if (methods.hasOwnProperty(methodName)) {
-						_this3[methodName] = Escort.factory(methods[methodName].bind(_this3), Escort.SINGULAR, HighOrderSingulars);
+						_this3[methodName] = Escort.factory(methods[methodName].bind(_this3), $$SINGULAR, HighOrderSingulars);
 						_this3[$objectSingularDestructors].push(bindMethodDestroyer.call(_this3, _this3[methodName]));
 					}
 				}
@@ -519,9 +505,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	Escort.createSingularMethods = createSingularMethods;
+	Escort.SINGULAR = $$SINGULAR; // Repeated execution calls rollback of last progress
+	Escort.PROMISE = $$PROMISE; // Process become promise
+	Escort.WAITTICK = $$WAITTICK; // Process waits next tick before execution
+	Escort.DESTRUCTOR = $$DESTRUCTOR;
+	var $actual = Symbol('actual');
 
-	exports.default = Escort;
-	module.exports = exports['default'];
+	module.exports = Escort;
 
 /***/ },
 /* 1 */
@@ -2288,6 +2278,4 @@ return /******/ (function(modules) { // webpackBootstrap
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ }
-/******/ ])
-});
-;
+/******/ ]);

@@ -94,11 +94,11 @@ var Escort = class Escort {
 	}
 }
 
-Escort.SINGULAR = bit.create(1); // Repeated execution calls rollback of last progress
-Escort.PROMISE = bit.create(2); // Process become promise
-Escort.WAITTICK = bit.create(3); // Process waits next tick before execution
-Escort.DESCTRUCTOR = Symbol('DESCTRUCTOR');
-var $actual = Symbol('actual');
+const $$SINGULAR = bit.create(1); // Repeated execution calls rollback of last progress
+const $$PROMISE = bit.create(2); // Process become promise
+const $$WAITTICK = bit.create(3); // Process waits next tick before execution
+const $$DESTRUCTOR = Symbol('DESTRUCTOR');
+
 
 Suit = function(handler, bitoptions, context, parent) {
 	this.bitoptions = bitoptions || 0;
@@ -121,7 +121,7 @@ Suit = function(handler, bitoptions, context, parent) {
 		/* It assumes that the function will be specified later */
 		this.compiledHandler = function slot(handler, args) {
 			this.compileHandler(handler).apply(this, args);
-			if (this.bitoptions & Escort.PROMISE) return this;
+			if (this.bitoptions & $$PROMISE) return this;
 			else return function() {
 				this.degrade();
 			}
@@ -135,7 +135,7 @@ Suit.prototype = {
 		return function process() {
 			var args = Array.prototype.slice.call(arguments);
 			self[$actual] = true;
-			if (self.bitoptions & Escort.PROMISE) self.clearPromise();
+			if (self.bitoptions & $$PROMISE) self.clearPromise();
 			if (self.destructors.length>0) { // 
 				self.degrade();
 			}
@@ -149,13 +149,13 @@ Suit.prototype = {
 					self.abort(e);
 				}
 			}
-			if (self.bitoptions & Escort.WAITTICK) {
+			if (self.bitoptions & $$WAITTICK) {
 				setTimeout(executor);
 			} else {
 				executor();
 			}
 
-			if (self.bitoptions & Escort.PROMISE) return self;
+			if (self.bitoptions & $$PROMISE) return self;
 			else return function() {
 				self.degrade();
 			}
@@ -294,7 +294,7 @@ Suit.prototype = {
 		this.degrade();
 
 		// Send reject if we are promise
-		if (this.bitoptions & Escort.PROMISE)
+		if (this.bitoptions & $$PROMISE)
 		this.$reject(reason instanceof Error ? reason : new Error(reason));
 	},
 	/*
@@ -303,7 +303,7 @@ Suit.prototype = {
 	success: function(data) {
 		this.stop();
 		// Send resolve if we are promise
-		if (this.bitoptions & Escort.PROMISE)
+		if (this.bitoptions & $$PROMISE)
 		this.$resolve(data); 
 	},
 	stop: function() {
@@ -375,7 +375,7 @@ function createSingularMethods() {
 				value: []
 			});
 
-			Object.defineProperty(this, Escort.DESCTRUCTOR, {
+			Object.defineProperty(this, $$DESTRUCTOR, {
 				writable: false,
 				editable: false,
 				enumerable: false,
@@ -388,7 +388,7 @@ function createSingularMethods() {
 
 			for (let methodName in methods) {
 				if (methods.hasOwnProperty(methodName)) {
-					this[methodName] = Escort.factory(methods[methodName].bind(this), Escort.SINGULAR, HighOrderSingulars);
+					this[methodName] = Escort.factory(methods[methodName].bind(this), $$SINGULAR, HighOrderSingulars);
 					this[$objectSingularDestructors].push(bindMethodDestroyer.call(this, this[methodName]));
 				}
 			}
@@ -398,6 +398,11 @@ function createSingularMethods() {
 }
 
 Escort.createSingularMethods = createSingularMethods;
+Escort.SINGULAR = $$SINGULAR; // Repeated execution calls rollback of last progress
+Escort.PROMISE = $$PROMISE; // Process become promise
+Escort.WAITTICK = $$WAITTICK; // Process waits next tick before execution
+Escort.DESTRUCTOR = $$DESTRUCTOR;
+var $actual = Symbol('actual');
 
-export default Escort;
+module.exports = Escort;
 
